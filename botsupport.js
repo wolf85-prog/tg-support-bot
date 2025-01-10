@@ -16,10 +16,6 @@ const token = process.env.TELEGRAM_API_TOKEN
 const botsupport = new TelegramBot(token, {polling: true});
 const app = express();
 
-app.use(statusMonitor({
-    title: 'Бот поддержки',
-    theme: '../../../../../custom.css',
-})); // Enable Express Status Monitor middleware
 app.use(express.json());
 app.use(cors());
 app.use(express.static(path.resolve(__dirname, 'static')))
