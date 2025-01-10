@@ -43,7 +43,7 @@ const credentials = {
 
 const httpsServer = https.createServer(credentials, app);
 
-bottest.on('message', async (msg) => {
+botsupport.on('message', async (msg) => {
     const chatId = msg.chat.id;
     const firstname = msg.from.first_name
     const lastname = msg.from.last_name
