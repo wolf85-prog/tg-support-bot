@@ -50,6 +50,7 @@ botsupport.on('message', async (msg) => {
     const lastname = msg.from.last_name
     const text = msg.text ? msg.text : '';
     const messageId = msg.message_id;
+    const username = msg.from.username ? msg.from.username : ''
 
     //console.log("msg: ", msg)
     //console.log("text: ", text)
