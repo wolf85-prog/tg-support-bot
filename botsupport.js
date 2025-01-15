@@ -23,7 +23,7 @@ app.use('/', router)
 
 //подключение к БД PostreSQL
 const sequelize = require('./botsupport/connections/db')
-const { UserBot, Conversation } = require('./botsupport/models/models');
+const { UserBot, Conversation, Message } = require('./botsupport/models/models');
 
 //socket.io
 const {io} = require("socket.io-client")
@@ -84,7 +84,97 @@ botsupport.on('message', async (msg) => {
         
         //обработка сообщений    
         if ((text || '')[0] !== '/' && text) {       
-      
+            if (text.startsWith("Reply")) {           
+                await bot.sendMessage(text.substring(6, text.indexOf('.')), text.slice(text.indexOf('.') + 2)) 
+
+            // Специалист успешно создан
+            } else if (text.startsWith('Данные успешно добавлены!')) {           
+            
+            } else {
+//----------------------------------------------------------------------------------------------------------------
+                //отправка сообщения 
+                // Подключаемся к серверу socket
+                let socket = io(socketUrl);
+                socket.emit("addUser", chatId)   
+
+                //добавление пользователя в БД USERBOT
+                const user = await UserBot.findOne({where:{chatId: chatId.toString()}})
+                if (!user) {
+                    await UserBot.create({ firstname: firstname, lastname: lastname, chatId: chatId, username: username })
+                    console.log('Пользователь добавлен в БД UserBots')
+                } else {
+                    console.log('Отмена операции! Пользователь уже существует в Userbots')
+                    await UserBot.update({ username: username }, {
+                        where: {
+                          chatId: chatId.toString(),
+                        },
+                    });
+                }
+
+
+                //приветствие
+                let hello = ''
+                const currentDate = new Date()
+                const currentHours = new Date(new Date().getTime()+10800000).getHours()
+
+                const countAll = await Message.count({
+                    where: { senderId: chatId.toString() },
+                });
+                const messages = await Message.findAll({
+                    order: [
+                        ['id', 'ASC'],
+                    ],
+                    where:{senderId: chatId.toString()}, 
+                    offset: countAll > 50 ? countAll - 50 : 0,
+                })
+                const messagesAll = JSON.parse(JSON.stringify(messages))
+                const mess = messagesAll.find((item)=> item.createdAt.split('T')[0] === currentDate.toISOString().split('T')[0])
+                //console.log("mess: ", mess)          
+                if (mess) {
+                    console.log("сегодня были сообщения")
+                } else { 
+                    if (currentHours >= 6 && currentHours < 12) {
+                        hello = 'Доброе утро'
+                    } else if (currentHours >= 12 && currentHours < 18) {
+                        hello = 'Добрый день'
+                    } else if (currentHours >= 0 && currentHours < 6) {
+                        hello = 'Доброй ночи'
+                    } else {
+                        hello = 'Добрый вечер' //18-0
+                    }                    
+                        
+                }
+
+                //-------------------------------------
+
+                //обработка пересылаемых сообщений
+                let str_text;
+                let reply_id;
+                if (msg.reply_to_message) {
+                    const message = await Message.findOne({where:{messageId: msg.reply_to_message.message_id.toString()}}) 
+                   str_text = `${message.dataValues.text}_reply_${text}`  
+                   reply_id = msg.reply_to_message.message_id              
+                } else {
+                    str_text = text
+                }
+
+                // сохранить отправленное боту сообщение пользователя в БД
+                const convId = sendMyMessage(str_text, 'text', chatId, messageId, reply_id)
+
+                socket.emit("sendMessageSpec", {
+                    senderId: chatId,
+                    receiverId: chatTelegramId,
+                    text: str_text,
+                    type: 'text',
+                    convId: convId,
+                    messageId: messageId,
+                    replyId: reply_id,
+                })
+            
+
+                //await bot.sendMessage(chatId, 'Я принял ваш запрос!')
+                //await bot.sendMessage(chatTelegramId, `${text} \n \n от ${firstname} ${lastname} ${chatId}`)           
+            }
         }
 
         //обработка изображений
