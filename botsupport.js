@@ -13,6 +13,10 @@ const { Op } = require('sequelize')
 
 const token = process.env.TELEGRAM_API_TOKEN
 
+//функции
+const sendMyMessage = require('./bot/common/sendMyMessage')
+const sendMessageAdmin = require('./bot/common/sendMessageAdmin')
+
 const botsupport = new TelegramBot(token, {polling: true});
 const app = express();
 
