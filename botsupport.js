@@ -28,7 +28,7 @@ app.use('/', router)
 
 //подключение к БД PostreSQL
 const sequelize = require('./botsupport/connections/db')
-const { UserBot, Conversation, Message } = require('./botsupport/models/models');
+const { UserBot, Conversation, Message, Manager } = require('./botsupport/models/models');
 
 //socket.io
 const {io} = require("socket.io-client")
@@ -114,6 +114,18 @@ botsupport.on('message', async (msg) => {
                           chatId: chatId.toString(),
                         },
                     });
+                }
+
+                //добавление пользователя в БД Manager
+                const userW = await Manager.findOne({where:{chatId: chatId.toString()}})
+                if (!userW) {
+                    await Manager.create({ 
+                        fio: lastname + ' ' + firstname, 
+                        chatId: chatId, 
+                    })
+                    console.log('Пользователь добавлен в БД Manager')
+                } else {
+                    console.log('Отмена операции! Пользователь уже существует в Manager')
                 }
 
 
