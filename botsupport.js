@@ -12,6 +12,7 @@ const axios = require("axios");
 const { Op } = require('sequelize')
 
 const token = process.env.TELEGRAM_API_TOKEN
+const chatTelegramId = process.env.CHAT_ID
 
 //функции
 const sendMyMessage = require('./botsupport/common/sendMyMessage')
