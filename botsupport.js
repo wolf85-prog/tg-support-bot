@@ -66,22 +66,22 @@ botsupport.on('message', async (msg) => {
         if (text === '/start') {
             // 1 (пользователь бота)
             //добавить пользователя в бд
-            const user = await UserBot.findOne({where:{chatId: chatId.toString()}})
-            if (!user) {
-                console.log('Начинаю сохранять данные пользователя...')
-                await UserBot.create({ firstname: firstname, lastname: lastname, chatId: chatId, username: username })
-                console.log('Пользователь добавлен в БД')
-            } else {
-                console.log('Отмена добавления в БД. Пользователь уже существует')
+            // const user = await UserBot.findOne({where:{chatId: chatId.toString()}})
+            // if (!user) {
+            //     console.log('Начинаю сохранять данные пользователя...')
+            //     await UserBot.create({ firstname: firstname, lastname: lastname, chatId: chatId, username: username })
+            //     console.log('Пользователь добавлен в БД')
+            // } else {
+            //     console.log('Отмена добавления в БД. Пользователь уже существует')
                 
-                console.log('Обновление ника...', username)
-                const res = await UserBot.update({ 
-                    username: username,
-                },
-                { 
-                    where: {chatId: chatId.toString()} 
-                })
-            }
+            //     console.log('Обновление ника...', username)
+            //     const res = await UserBot.update({ 
+            //         username: username,
+            //     },
+            //     { 
+            //         where: {chatId: chatId.toString()} 
+            //     })
+            // }
         }
 
 
